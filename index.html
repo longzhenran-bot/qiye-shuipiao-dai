@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>企业税票贷</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7fd;color:#17345d;font-family:Arial,"Microsoft YaHei",sans-serif}
+header{background:#0d397b;color:white;padding:18px 7%;font-size:22px;font-weight:bold}
+main{max-width:620px;margin:32px auto;padding:0 16px}.card{background:white;border:1px solid #dce7f6;border-radius:16px;padding:26px;box-shadow:0 10px 28px #123b7110}
+h1{font-size:25px;margin:0 0 8px}.muted{color:#70829d;font-size:14px;line-height:1.7}
+.steps{display:flex;gap:6px;margin:22px 0}.steps span{flex:1;text-align:center;padding:9px 2px;border-radius:8px;background:#edf3fb;color:#7486a0;font-size:12px}.steps .on{background:#dceaff;color:#125ec4;font-weight:bold}
+label{display:block;margin:15px 0 7px;font-size:14px;font-weight:bold}input,select{width:100%;padding:12px;border:1px solid #cfdaea;border-radius:9px;font-size:15px;background:white}
+.row{display:grid;grid-template-columns:1fr 110px;gap:9px}.captcha{display:grid;place-items:center;background:#e8f1ff;color:#174c99;font-weight:bold;letter-spacing:5px;border-radius:9px;cursor:pointer}
+button{border:0;border-radius:9px;padding:13px 16px;background:#1769d2;color:white;font-size:16px;font-weight:bold;width:100%;margin-top:20px;cursor:pointer}.secondary{background:white;border:1px solid #c4d7f3;color:#1769d2;margin-top:10px}
+.page{display:none}.page.active{display:block}.uploads{display:grid;gap:12px;grid-template-columns:1fr 1fr}.upload{border:1px dashed #9bb8e7;border-radius:10px;padding:14px;background:#f8fbff}.upload input{padding:6px;font-size:12px}.amount{background:#125fc5;color:white;border-radius:12px;text-align:center;padding:22px;margin:18px 0}.amount strong{display:block;font-size:38px;margin:6px}.notice{font-size:12px;color:#7b8da7;line-height:1.7;margin-top:16px}
+@media(max-width:480px){.card{padding:20px}.uploads{grid-template-columns:1fr}}
+</style></head>
+<body>
+<header>企业税票贷</header>
+<main>
+<section class="card page active" id="p1">
+<h1>登录申请</h1><p class="muted">请填写申请人信息。</p>
+<form id="login">
+<label>本人姓名</label><input id="name" required placeholder="请输入姓名">
+<label>身份证号</label><input id="idno" required placeholder="请输入身份证号">
+<label>图形验证码（点击验证码可刷新）</label><div class="row"><input id="code" required placeholder="请输入验证码"><div class="captcha" id="cap1">A6K9</div></div>
+<button>下一步</button>
+</form><p class="notice">请确认网站运营主体及隐私政策后再提交真实个人信息。</p>
+</section>
+<section class="card page" id="p2">
+<h1>企业资料</h1><div class="steps"><span class="on">资料填写</span><span>审核中</span><span>审核结果</span></div>
+<form id="apply">
+<label>企业名称</label><input required placeholder="请输入企业全称">
+<label>统一社会信用代码 / 税号</label><input required placeholder="请输入税号">
+<label>身份证正面</label><div class="upload"><input type="file" accept="image/*" required></div>
+<label>身份证反面</label><div class="upload"><input type="file" accept="image/*" required></div>
+<label>营业执照</label><div class="upload"><input type="file" accept="image/*,.pdf" required></div>
+<label>图形验证码</label><div class="row"><input id="code2" required placeholder="请输入验证码"><div class="captcha" id="cap2">M4P7</div></div>
+<button>提交申请</button><button type="button" class="secondary" onclick="show('p1')">返回</button>
+</form><p class="notice">资料应通过安全后端加密传输并仅用于已授权的审核用途。</p>
+</section>
+<section class="card page" id="p3">
+<h1>申请审核中</h1><p class="muted">资料已提交，审核进度以实际业务系统为准。</p><div class="steps"><span>资料提交</span><span class="on">审核中</span><span>审核结果</span></div>
+<p>请等待运营主体或合作金融机构审核。此页面不会自动批准贷款。</p><button onclick="show('p4')">查看结果页面</button>
+</section>
+<section class="card page" id="p4">
+<h1>贷款申请结果</h1><p class="muted">请以真实审核结果及正式合同为准。</p>
+<div class="amount">申请额度<strong>¥720,000</strong>申请目标金额</div>
+<label>申请期限</label><select><option>12期</option><option>24期</option></select>
+<label>还款方式</label><select><option>先息后本（以审批合同为准）</option><option>等额本息（以审批合同为准）</option></select>
+<p class="notice">利率、最终额度、费用及还款安排须由实际提供贷款的金融机构审核并在合同中明确。</p><button onclick="show('p1')">返回首页</button>
+</section>
+</main>
+<script>
+function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function makeCode(id){let chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';for(let i=0;i<4;i++)s+=chars[Math.floor(Math.random()*chars.length)];document.getElementById(id).textContent=s;return s}
+let c1=makeCode('cap1'),c2=makeCode('cap2');document.getElementById('cap1').onclick=()=>c1=makeCode('cap1');document.getElementById('cap2').onclick=()=>c2=makeCode('cap2');
+document.getElementById('login').onsubmit=e=>{e.preventDefault();if(document.getElementById('code').value.toUpperCase()!==c1){alert('验证码错误');c1=makeCode('cap1');return}show('p2')};
+document.getElementById('apply').onsubmit=e=>{e.preventDefault();if(document.getElementById('code2').value.toUpperCase()!==c2){alert('验证码错误');c2=makeCode('cap2');return}show('p3')};
+</script>
+</body></html>
