@@ -1,61 +1,12 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>企业税票贷</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#f3f7fd;color:#17345d;font-family:Arial,"Microsoft YaHei",sans-serif}
-header{background:#0d397b;color:white;padding:18px 7%;font-size:22px;font-weight:bold}
-main{max-width:620px;margin:32px auto;padding:0 16px}.card{background:white;border:1px solid #dce7f6;border-radius:16px;padding:26px;box-shadow:0 10px 28px #123b7110}
-h1{font-size:25px;margin:0 0 8px}.muted{color:#70829d;font-size:14px;line-height:1.7}
-.steps{display:flex;gap:6px;margin:22px 0}.steps span{flex:1;text-align:center;padding:9px 2px;border-radius:8px;background:#edf3fb;color:#7486a0;font-size:12px}.steps .on{background:#dceaff;color:#125ec4;font-weight:bold}
-label{display:block;margin:15px 0 7px;font-size:14px;font-weight:bold}input,select{width:100%;padding:12px;border:1px solid #cfdaea;border-radius:9px;font-size:15px;background:white}
-.row{display:grid;grid-template-columns:1fr 110px;gap:9px}.captcha{display:grid;place-items:center;background:#e8f1ff;color:#174c99;font-weight:bold;letter-spacing:5px;border-radius:9px;cursor:pointer}
-button{border:0;border-radius:9px;padding:13px 16px;background:#1769d2;color:white;font-size:16px;font-weight:bold;width:100%;margin-top:20px;cursor:pointer}.secondary{background:white;border:1px solid #c4d7f3;color:#1769d2;margin-top:10px}
-.page{display:none}.page.active{display:block}.uploads{display:grid;gap:12px;grid-template-columns:1fr 1fr}.upload{border:1px dashed #9bb8e7;border-radius:10px;padding:14px;background:#f8fbff}.upload input{padding:6px;font-size:12px}.amount{background:#125fc5;color:white;border-radius:12px;text-align:center;padding:22px;margin:18px 0}.amount strong{display:block;font-size:38px;margin:6px}.notice{font-size:12px;color:#7b8da7;line-height:1.7;margin-top:16px}
-@media(max-width:480px){.card{padding:20px}.uploads{grid-template-columns:1fr}}
-</style></head>
-<body>
-<header>企业税票贷</header>
-<main>
-<section class="card page active" id="p1">
-<h1>登录申请</h1><p class="muted">请填写申请人信息。</p>
-<form id="login">
-<label>本人姓名</label><input id="name" required placeholder="请输入姓名">
-<label>身份证号</label><input id="idno" required placeholder="请输入身份证号">
-<label>图形验证码（点击验证码可刷新）</label><div class="row"><input id="code" required placeholder="请输入验证码"><div class="captcha" id="cap1">A6K9</div></div>
-<button>下一步</button>
-</form><p class="notice">请确认网站运营主体及隐私政策后再提交真实个人信息。</p>
-</section>
-<section class="card page" id="p2">
-<h1>企业资料</h1><div class="steps"><span class="on">资料填写</span><span>审核中</span><span>审核结果</span></div>
-<form id="apply">
-<label>企业名称</label><input required placeholder="请输入企业全称">
-<label>统一社会信用代码 / 税号</label><input required placeholder="请输入税号">
-<label>身份证正面</label><div class="upload"><input type="file" accept="image/*" required></div>
-<label>身份证反面</label><div class="upload"><input type="file" accept="image/*" required></div>
-<label>营业执照</label><div class="upload"><input type="file" accept="image/*,.pdf" required></div>
-<label>图形验证码</label><div class="row"><input id="code2" required placeholder="请输入验证码"><div class="captcha" id="cap2">M4P7</div></div>
-<button>提交申请</button><button type="button" class="secondary" onclick="show('p1')">返回</button>
-</form><p class="notice">资料应通过安全后端加密传输并仅用于已授权的审核用途。</p>
-</section>
-<section class="card page" id="p3">
-<h1>申请审核中</h1><p class="muted">资料已提交，审核进度以实际业务系统为准。</p><div class="steps"><span>资料提交</span><span class="on">审核中</span><span>审核结果</span></div>
-<p>请等待运营主体或合作金融机构审核。此页面不会自动批准贷款。</p><button onclick="show('p4')">查看结果页面</button>
-</section>
-<section class="card page" id="p4">
-<h1>贷款申请结果</h1><p class="muted">请以真实审核结果及正式合同为准。</p>
-<div class="amount">申请额度<strong>¥720,000</strong>申请目标金额</div>
-<label>申请期限</label><select><option>12期</option><option>24期</option></select>
-<label>还款方式</label><select><option>先息后本（以审批合同为准）</option><option>等额本息（以审批合同为准）</option></select>
-<p class="notice">利率、最终额度、费用及还款安排须由实际提供贷款的金融机构审核并在合同中明确。</p><button onclick="show('p1')">返回首页</button>
-</section>
-</main>
-<script>
-function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
-function makeCode(id){let chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';for(let i=0;i<4;i++)s+=chars[Math.floor(Math.random()*chars.length)];document.getElementById(id).textContent=s;return s}
-let c1=makeCode('cap1'),c2=makeCode('cap2');document.getElementById('cap1').onclick=()=>c1=makeCode('cap1');document.getElementById('cap2').onclick=()=>c2=makeCode('cap2');
-document.getElementById('login').onsubmit=e=>{e.preventDefault();if(document.getElementById('code').value.toUpperCase()!==c1){alert('验证码错误');c1=makeCode('cap1');return}show('p2')};
-document.getElementById('apply').onsubmit=e=>{e.preventDefault();if(document.getElementById('code2').value.toUpperCase()!==c2){alert('验证码错误');c2=makeCode('cap2');return}show('p3')};
-</script>
-</body></html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#123d72"><title>企业税票贷｜企业融资申请</title><style>
+:root{--navy:#123d72;--blue:#2168b4;--pale:#edf5fc;--ink:#172b42;--muted:#60748a;--line:#dce5ee;--bg:#f5f8fb}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);line-height:1.6}.top{background:linear-gradient(115deg,#123d72,#2168b4);color:#fff;padding:20px max(22px,calc((100% - 1100px)/2))}.brand{font-size:20px;font-weight:750;letter-spacing:.5px}.brand small{display:block;font-size:12px;font-weight:400;opacity:.8;letter-spacing:1.8px}.wrap{max-width:1100px;margin:30px auto;padding:0 20px}.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:stretch}.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:0 8px 24px #193d6410}.eyebrow{font-size:12px;color:var(--blue);font-weight:700;letter-spacing:1.5px}.hero h1{font-size:clamp(27px,4vw,40px);line-height:1.25;margin:12px 0}.hero p{color:var(--muted);margin-bottom:22px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.feature{padding:13px;background:var(--pale);border-radius:10px;font-size:13px}.feature b{display:block;color:var(--navy);font-size:14px;margin-bottom:4px}.formtitle{font-size:21px;margin:0 0 5px}.sub{font-size:13px;color:var(--muted);margin:0 0 20px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-size:13px;font-weight:650}input,select,textarea{font:inherit;width:100%;border:1px solid #cdd9e5;border-radius:9px;padding:11px 12px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2168b41c}textarea{min-height:88px;resize:vertical}.check{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);margin:16px 0}.check input{width:auto;margin-top:5px}.btn{border:0;border-radius:9px;background:var(--blue);color:white;padding:12px 18px;font-weight:700;font-size:15px;cursor:pointer}.btn:disabled{opacity:.6;cursor:wait}.btn.secondary{background:white;color:var(--blue);border:1px solid #b7cde2}.actions{display:flex;gap:10px;flex-wrap:wrap}.notice{font-size:12px;color:var(--muted);margin-top:14px}.result{margin-top:15px;border-radius:10px;padding:14px;background:var(--pale);display:none;overflow-wrap:anywhere}.result strong{color:var(--navy)}.lookup{margin-top:22px}.lookupform{display:grid;grid-template-columns:1.4fr .7fr auto;gap:10px}.status{display:inline-block;padding:3px 9px;border-radius:99px;background:#eaf3ff;color:#145ca0;font-size:12px;font-weight:700}.footer{text-align:center;color:#7c8b9b;font-size:12px;padding:24px}.hidden{display:none!important}@media(max-width:760px){.hero{grid-template-columns:1fr}.panel{padding:21px}.features{grid-template-columns:1fr}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.lookupform{grid-template-columns:1fr}.wrap{margin:18px auto}}
+</style></head><body><header class="top"><div class="brand">企业税票贷<small>ENTERPRISE FINANCING SERVICES</small></div></header><main class="wrap"><section class="hero"><div class="panel"><div class="eyebrow">ENTERPRISE FINANCING</div><h1>以企业经营为基础<br>了解合适的融资方案</h1><p>提交企业融资需求，由工作人员按业务流程进行资料核验与审核。申请提交不代表授信或放款承诺，具体结果以正式审核为准。</p><div class="features"><div class="feature"><b>流程清晰</b>申请进度可查询</div><div class="feature"><b>信息保护</b>按授权及业务需要处理</div><div class="feature"><b>专人审核</b>审核结果及时更新</div></div></div><div class="panel"><h2 class="formtitle">企业融资申请</h2><p class="sub">请填写真实、准确的企业及联系人信息（带 * 为必填项）</p><form id="applyForm"><div class="fields"><div class="field full"><label for="company_name">企业名称 *</label><input id="company_name" name="company_name" maxlength="120" required autocomplete="organization" placeholder="请输入企业工商登记名称"></div><div class="field"><label for="credit_code">统一社会信用代码</label><input id="credit_code" name="credit_code" maxlength="32" placeholder="选填"></div><div class="field"><label for="city">企业所在城市 *</label><input id="city" name="city" maxlength="100" required placeholder="例如：成都市"></div><div class="field"><label for="contact_name">联系人 *</label><input id="contact_name" name="contact_name" maxlength="60" required autocomplete="name"></div><div class="field"><label for="contact_phone">联系电话 *</label><input id="contact_phone" name="contact_phone" maxlength="30" required autocomplete="tel" inputmode="tel"></div><div class="field"><label for="loan_amount">申请融资金额（元）*</label><input id="loan_amount" name="loan_amount" type="number" min="10000" max="100000000" step="1000" required placeholder="最低 10,000 元"></div><div class="field"><label for="loan_purpose">融资用途 *</label><select id="loan_purpose" name="loan_purpose" required><option value="">请选择</option><option>经营周转</option><option>采购备货</option><option>设备购置</option><option>支付经营性费用</option><option>其他合规经营用途</option></select></div><div class="field full"><label for="extra">补充说明</label><textarea id="extra" maxlength="500" placeholder="选填；请勿在此填写身份证号、银行卡号或税票明细等敏感资料"></textarea></div></div><label class="check"><input type="checkbox" id="consent" required><span>我已阅读并同意本网站对申请信息进行收集和处理，以便联系我并评估融资申请。我确认所填信息真实，并知悉提交申请不构成授信或放款承诺。</span></label><button class="btn" id="submitBtn" type="submit">提交融资申请</button><div id="applyResult" class="result" role="status" aria-live="polite"></div><p class="notice">请勿通过本页面提交身份证照片、银行卡密码、短信验证码或税务系统登录凭证。</p></form></div></section><section class="panel lookup"><h2 class="formtitle">申请进度查询</h2><p class="sub">使用提交成功时生成的申请编号和 6 位查询码查询状态。</p><form id="lookupForm" class="lookupform"><input id="lookupNo" required maxlength="32" placeholder="申请编号，例如 QY20261021AB12CD34"><input id="lookupCode" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6 位查询码"><button class="btn secondary" type="submit">查询进度</button></form><div id="lookupResult" class="result" role="status" aria-live="polite"></div></section></main><footer class="footer">企业融资服务 · 请以正式审核及合同文件为准</footer><script>
+// Set API_BASE to the separately deployed HTTPS API URL before publishing.
+const API_BASE = window.API_BASE || 'https://YOUR-API-DOMAIN.example.com';
+async function request(path, body){if(API_BASE.includes('YOUR-API-DOMAIN')) throw new Error('网站后端尚未配置。请先部署 API 并设置 API_BASE。');const r=await fetch(API_BASE+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await r.json().catch(()=>({error:'服务器返回格式异常'}));if(!r.ok)throw new Error(data.error||'请求失败');return data}
+const show=(el,html)=>{el.innerHTML=html;el.style.display='block'};
+document.getElementById('applyForm').addEventListener('submit',async e=>{e.preventDefault();const btn=document.getElementById('submitBtn'),out=document.getElementById('applyResult');btn.disabled=true;btn.textContent='正在提交…';out.style.display='none';const form=new FormData(e.currentTarget);const body={company_name:form.get('company_name'),credit_code:form.get('credit_code'),city:form.get('city'),contact_name:form.get('contact_name'),contact_phone:form.get('contact_phone'),loan_amount:Number(form.get('loan_amount')),loan_purpose:form.get('loan_purpose'),consent_privacy:document.getElementById('consent').checked};try{const d=await request('/api/applications',body);show(out,`<strong>申请已提交</strong><p>申请编号：<strong>${d.application_no}</strong></p><p>查询码：<strong>${d.access_code}</strong></p><p>请立即保存以上两项信息。查询码仅显示一次，遗失后无法通过本页面找回。</p><button type="button" class="btn secondary" id="copyInfo">复制申请信息</button>`);document.getElementById('copyInfo').onclick=()=>navigator.clipboard.writeText(`申请编号：${d.application_no}\n查询码：${d.access_code}`).then(()=>alert('已复制')).catch(()=>alert('请手动保存申请编号和查询码'));e.currentTarget.reset()}catch(err){show(out,`<strong>暂时无法提交</strong><p>${escapeHtml(err.message)}</p>`)}finally{btn.disabled=false;btn.textContent='提交融资申请'}});
+document.getElementById('lookupForm').addEventListener('submit',async e=>{e.preventDefault();const out=document.getElementById('lookupResult');out.style.display='none';try{const d=await request('/api/applications/status',{application_no:document.getElementById('lookupNo').value,access_code:document.getElementById('lookupCode').value});show(out,`<strong>申请进度</strong><p>申请编号：${escapeHtml(d.application_no)}</p><p><span class="status">${escapeHtml(d.status)}</span></p>${d.customer_message?`<p>最新通知：${escapeHtml(d.customer_message)}</p>`:''}<p class="notice">最近更新时间：${new Date(d.updated_at).toLocaleString()}</p>`)}catch(err){show(out,`<strong>查询失败</strong><p>${escapeHtml(err.message)}</p>`)}});
+function escapeHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script></body></html>
