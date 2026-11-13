@@ -18,6 +18,10 @@ const FUNCTION_ROUTES = new Map([
   ['/applications', new Set(['GET'])],
   ['/notifications', new Set(['GET'])],
   ['/notifications/read', new Set(['POST'])],
+  ['/me', new Set(['GET'])],
+  ['/staff/applications', new Set(['GET'])],
+  ['/staff/review', new Set(['POST'])],
+  ['/staff/document-link', new Set(['POST'])],
 ]);
 const ALLOWED_FORWARD_HEADERS = [
   'apikey','authorization','content-type','accept','x-client-info',
@@ -54,7 +58,8 @@ function permittedRoute(path, method) {
   const fPrefix = '/functions/v1/qiye-api';
   if (path.startsWith(fPrefix + '/')) {
     const route = path.slice(fPrefix.length);
-    return FUNCTION_ROUTES.get(route)?.has(method) || false;
+    return FUNCTION_ROUTES.get(route)?.has(method)
+      || (method === 'GET' && /^\/staff\/terms\/[0-9a-f-]{36}$/.test(route));
   }
   if (path === '/storage/v1/object/list/loan-documents-private') {
     return method === 'POST';
@@ -67,9 +72,32 @@ function permittedRoute(path, method) {
   return false;
 }
 
+function isSignedDocument(path) {
+  return /^\/storage\/v1\/object\/sign\/loan-documents-private\/[0-9a-f-]{36}\/[0-9a-f-]{36}\/(?:id-front|id-back|business-license)\.(?:jpg|jpeg|png|webp|pdf)$/i.test(path);
+}
+
 export default {
   async fetch(request, env) {
     const incoming = new URL(request.url);
+    if (request.method === 'GET' && isSignedDocument(incoming.pathname)) {
+      const token = incoming.searchParams.get('token');
+      if (!token) return json({error:'authentication_required'},401);
+      const target = new URL(incoming.pathname,SUPABASE_ORIGIN);
+      target.searchParams.set('token',token);
+      try {
+        const upstream = await fetch(target,{redirect:'manual',signal:AbortSignal.timeout(18000)});
+        const headers = new Headers({
+          'content-type':upstream.headers.get('content-type') || 'application/octet-stream',
+          'cache-control':'private, no-store',
+          'x-content-type-options':'nosniff',
+          'referrer-policy':'no-referrer',
+          'content-security-policy':"default-src 'none'; sandbox",
+        });
+        return new Response(upstream.body,{status:upstream.status,headers});
+      } catch {
+        return json({error:'upstream_unavailable'},503);
+      }
+    }
     if (incoming.pathname === '/api/health' && request.method === 'GET') {
       return json({status:'ok',service:'qiye-shuipiao-dai'});
     }
@@ -148,6 +176,15 @@ export default {
         'access-control-allow-methods','access-control-allow-headers','access-control-expose-headers',
         'access-control-max-age','set-cookie','content-length']) out.delete(name);
       for (const [name,value] of Object.entries(corsHeaders())) out.set(name,value);
+      if (path === '/functions/v1/qiye-api/staff/document-link' && upstream.ok) {
+        const result = await upstream.json();
+        const signedUrl = new URL(result.url);
+        if (signedUrl.origin !== SUPABASE_ORIGIN || !isSignedDocument(signedUrl.pathname)) {
+          return json({error:'file_link_failed'},502,true);
+        }
+        result.url = incoming.origin + signedUrl.pathname + signedUrl.search;
+        return json(result,upstream.status,true);
+      }
       return new Response(upstream.body,{status:upstream.status,headers:out});
     } catch (_) {
       return json({error:'upstream_unavailable',message:'认证或上传服务器暂时无法连接，请稍后重试'},503,true);
