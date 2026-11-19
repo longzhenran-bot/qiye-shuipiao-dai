@@ -69,7 +69,58 @@ const statusLabel={pending:'待审核',reviewing:'审核中',approved:'审核通
 let currentUser=null,currentApplication=null,toastTimer;
 let knownNotificationIds=new Set(),notificationInitialized=false;
 function toast(msg){const el=byId('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display='none',6500)}
-async function api(path,method='GET',body){const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('安全会话未就绪，请重新提交或刷新页面');const res=await fetch(BASE+'/functions/v1/qiye-api'+path,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token,apikey:KEY},body:body===undefined?undefined:JSON.stringify(body)});const data=await res.json().catch(()=>({error:'后端响应异常'}));if(!res.ok)throw new Error(data.error||'后端请求失败');return data}
+const apiEndpoints=[
+  BASE+'/functions/v1/qiye-api',
+  'https://verzesghsasjhpbozmgw.functions.supabase.co/qiye-api',
+];
+let apiEndpointPromise=null;
+
+async function findApiEndpoint(headers){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),5000);
+  try{
+    // Check reachability with the same headers before sending an application.
+    return await Promise.any(apiEndpoints.map(async endpoint=>{
+      const response=await fetch(endpoint+'/health',{headers,cache:'no-store',signal:controller.signal});
+      if(!response.ok)throw new Error('health_check_failed');
+      const data=await response.json();
+      if(data.authenticated!==true||data.service!=='qiye-shuipiao-dai')throw new Error('invalid_health_response');
+      return endpoint;
+    }));
+  }catch{
+    throw new Error('当前网络无法连接申请服务，请切换网络后重试');
+  }finally{
+    clearTimeout(timeout);
+    controller.abort();
+  }
+}
+
+async function api(path,method='GET',body){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session)throw new Error('安全会话未就绪，请重新提交或刷新页面');
+  const headers={'Content-Type':'application/json',Authorization:'Bearer '+session.access_token,apikey:KEY};
+  if(!apiEndpointPromise){
+    apiEndpointPromise=findApiEndpoint(headers).catch(error=>{
+      apiEndpointPromise=null;
+      throw error;
+    });
+  }
+  const endpointPromise=apiEndpointPromise;
+  const endpoint=await endpointPromise;
+  let response;
+  try{
+    response=await fetch(endpoint+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body)});
+  }catch{
+    if(apiEndpointPromise===endpointPromise)apiEndpointPromise=null;
+    if(path==='/applications/secure'&&method==='POST'){
+      throw new Error('暂未收到提交结果，请先到「进度查询」确认后再重试');
+    }
+    throw new Error('当前网络与申请服务的连接中断，请重试');
+  }
+  const data=await response.json().catch(()=>({error:'后端响应异常'}));
+  if(!response.ok)throw new Error(data.error||'后端请求失败');
+  return data;
+}
 function tab(name){
   if(!['home','apply','status','notifications'].includes(name))return;
   document.querySelectorAll('main > section').forEach(el=>el.hidden=el.id!==name);
