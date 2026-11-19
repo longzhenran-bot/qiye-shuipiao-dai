@@ -62,40 +62,14 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
 const BASE='https://verzesghsasjhpbozmgw.supabase.co';
 const KEY='sb_publishable_mEsqewvVT_kVKzdFaXyEwA_M17G4Dyy';
-const PROXY='https://qiye-shuipiao-dai.longzhenran.workers.dev';
-let routePromise;
-function getApiOrigin(){
-  if(!routePromise){
-    routePromise=(async()=>{
-      const controller=new AbortController();
-      const timer=setTimeout(()=>controller.abort(),5500);
-      try{
-        const result=await fetch(PROXY+'/api/auth-health',{cache:'no-store',signal:controller.signal});
-        if(result.ok&&(await result.json()).authentication_upstream==='reachable')return PROXY;
-      }catch{}
-      finally{clearTimeout(timer)}
-      routePromise=null;
-      return BASE;
-    })();
-  }
-  return routePromise;
-}
-async function serviceFetch(input,options){
-  const target=new URL(typeof input==='string'?input:input.url||input.href);
-  if(target.origin!==BASE)return fetch(input,options);
-  const apiOrigin=await getApiOrigin();
-  if(apiOrigin===BASE)return fetch(input,options);
-  const address=apiOrigin+target.pathname+target.search;
-  return fetch(input instanceof Request?new Request(address,input):address,options);
-}
-const sb=createClient(BASE,KEY,{global:{fetch:serviceFetch},auth:{persistSession:true,autoRefreshToken:true}});
+const sb=createClient(BASE,KEY,{auth:{persistSession:true,autoRefreshToken:true}});
 const byId=id=>document.getElementById(id);
 const escaped=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statusLabel={pending:'待审核',reviewing:'审核中',approved:'审核通过',rejected:'审核不通过',supplement_required:'待补充材料'};
 let currentUser=null,currentApplication=null,toastTimer;
 let knownNotificationIds=new Set(),notificationInitialized=false;
 function toast(msg){const el=byId('toast');el.textContent=msg;el.style.display='block';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.style.display='none',6500)}
-async function api(path,method='GET',body){const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('安全会话未就绪，请重新提交或刷新页面');const res=await serviceFetch(BASE+'/functions/v1/qiye-api'+path,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token,apikey:KEY},body:body===undefined?undefined:JSON.stringify(body)});const data=await res.json().catch(()=>({error:'后端响应异常'}));if(!res.ok)throw new Error(data.error||'后端请求失败');return data}
+async function api(path,method='GET',body){const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('安全会话未就绪，请重新提交或刷新页面');const res=await fetch(BASE+'/functions/v1/qiye-api'+path,{method,headers:{'Content-Type':'application/json',Authorization:'Bearer '+session.access_token,apikey:KEY},body:body===undefined?undefined:JSON.stringify(body)});const data=await res.json().catch(()=>({error:'后端响应异常'}));if(!res.ok)throw new Error(data.error||'后端请求失败');return data}
 function tab(name){
   if(!['home','apply','status','notifications'].includes(name))return;
   document.querySelectorAll('main > section').forEach(el=>el.hidden=el.id!==name);
@@ -122,7 +96,6 @@ async function ensureGuestSession(){
         if(error?.status===429)throw new Error('认证请求过于频繁，请稍后重试');
         if(error?.code==='anonymous_provider_disabled')throw new Error('申请认证暂不可用，请联系平台管理员');
         if(error?.name==='AuthRetryableFetchError'||error?.status===0){
-          routePromise=null;
           throw new Error('当前网络暂时无法连接认证服务，请稍后重试');
         }
         throw new Error('无法建立安全会话，请稍后重试');
